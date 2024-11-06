@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "112097786399",
+    "firebase_url": "https://edufund-10e8f-default-rtdb.firebaseio.com",
+    "project_id": "edufund-10e8f",
+    "storage_bucket": "edufund-10e8f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:112097786399:android:8edd67f5ee337a16c2732a",
+        "android_client_info": {
+          "package_name": "com.example.forum"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBj70IRmALkbJEX3S2gqfFw0QditvrmAEI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
