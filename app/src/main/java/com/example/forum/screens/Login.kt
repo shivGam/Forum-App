@@ -1,5 +1,6 @@
 package com.example.forum.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -13,15 +14,63 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.forum.navigation.Routes
+import com.example.forum.viewmodels.AuthViewModel
 
 @Composable
 fun Login(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val authViewModel: AuthViewModel = viewModel()
+    val firebaseUser by authViewModel.firebaseUser.observeAsState()
+    val error by authViewModel.error.observeAsState()
+    val context = LocalContext.current
+    var showErrorDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(firebaseUser) {
+        if(firebaseUser != null){
+            navController.navigate(Routes.BottomNav.routes){
+                popUpTo(navController.graph.startDestinationId)
+                launchSingleTop = true
+            }
+        }
+    }
+
+    LaunchedEffect(error) {
+        if (error != null) {
+            showErrorDialog = true
+        }
+    }
+
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showErrorDialog = false
+                authViewModel._error.value = null
+            },
+            title = {
+                Text("Error")
+            },
+            text = {
+                Text(error ?: "An unexpected error occurred")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showErrorDialog = false
+                    authViewModel._error.value = null
+                }) {
+                    Text("OK")
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -97,11 +146,17 @@ fun Login(navController: NavHostController) {
 
         // Login Button
         Button(
-            onClick = { },
+            onClick = {
+                if(email.isEmpty() || password.isEmpty()) {
+                    Toast.makeText(context, "Please fill all details", Toast.LENGTH_SHORT).show()
+                } else {
+                    authViewModel.login(email, password, context)
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            colors = ButtonDefaults.buttonColors()  // Uses default Material theme colors
+            colors = ButtonDefaults.buttonColors()
         ) {
             Text(
                 text = "Login",
@@ -126,11 +181,3 @@ fun Login(navController: NavHostController) {
         }
     }
 }
-
-//@Preview
-//@Composable
-//fun ShowLogin() {
-//    MaterialTheme {
-//        Login()
-//    }
-//}

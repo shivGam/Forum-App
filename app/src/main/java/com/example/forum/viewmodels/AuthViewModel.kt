@@ -2,9 +2,7 @@ package com.example.forum.viewmodels
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,9 +10,11 @@ import com.example.forum.data.models.UserModel
 import com.example.forum.utils.SharedPref
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.UploadTask
 import com.google.firebase.storage.ktx.storage
 import java.util.UUID
 
@@ -29,22 +29,37 @@ class AuthViewModel : ViewModel() {
     private val _firebaseUser = MutableLiveData<FirebaseUser>()
     val firebaseUser : LiveData<FirebaseUser> = _firebaseUser
 
-    private val _error = MutableLiveData<String>()
+    val _error = MutableLiveData<String>()
     val error : LiveData<String> = _error
 
     init {
         _firebaseUser.value = auth.currentUser
     }
 
-    fun login(email :String,password:String){
+    fun login(email: String, password: String, context: Context){
         auth.signInWithEmailAndPassword(email,password)
             .addOnCompleteListener {
                 if(it.isSuccessful){
                     _firebaseUser.postValue(auth.currentUser)
+                    getData(auth.currentUser!!.uid,context)
                 }else{
-                    _error.postValue("Something went wrong")
+                    _error.postValue(it.exception!!.message)
                 }
             }
+    }
+
+    private fun getData(uid: String,context: Context) {
+        userRef.child(uid).addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val userData = snapshot.getValue(UserModel::class.java)
+                SharedPref.storeDetails(userData!!.email,userData.name,userData.userName,userData.imageUri,context)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+        })
     }
 
     fun register(email : String , password: String, name : String, userName:String , image: Uri,context: Context){
