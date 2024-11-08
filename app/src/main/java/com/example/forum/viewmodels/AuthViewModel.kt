@@ -98,7 +98,7 @@ class AuthViewModel : ViewModel() {
     @SuppressLint("NullSafeMutableLiveData")
     fun logout(){
         auth.signOut()
-        _firebaseUser.postValue(null)  // Explicitly set to null
+        _firebaseUser.postValue(null)
     }
 
 }
