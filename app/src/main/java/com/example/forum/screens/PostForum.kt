@@ -128,13 +128,13 @@ fun PostForum() {
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = SharedPref.getUserName(context),
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(12.dp)
                         )
                         TextField(
                             value = postText,
@@ -149,7 +149,7 @@ fun PostForum() {
                             colors = TextFieldDefaults.colors(
                                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
                                 focusedContainerColor = MaterialTheme.colorScheme.background,
-                                focusedIndicatorColor = MaterialTheme.colorScheme.background,
+                                focusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 unfocusedIndicatorColor = MaterialTheme.colorScheme.background
                             )
                         )
