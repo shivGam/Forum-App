@@ -18,22 +18,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.forum.R
+import com.example.forum.navigation.Routes
 import com.example.forum.utils.SharedPref
+import com.example.forum.viewmodels.PostForumViewModel
+import com.google.firebase.auth.FirebaseAuth
+import okhttp3.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PostForum() {
+fun PostForum(navController: NavHostController) {
+    val postForumViewModel: PostForumViewModel = viewModel()
+    val isPosted by postForumViewModel.isPosted.observeAsState(false)
     val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var postText by remember { mutableStateOf("") }
@@ -61,6 +72,21 @@ fun PostForum() {
         }
     }
 
+    LaunchedEffect(isPosted) {
+        if(isPosted!!){
+            postText=""
+            imageUri=null
+            Toast.makeText(context,"New Forum Posted",Toast.LENGTH_SHORT).show()
+
+            navController.navigate(Routes.Home.routes){
+                popUpTo(Routes.PostForum.routes){
+                    inclusive = true
+                }
+            }
+
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -76,7 +102,13 @@ fun PostForum() {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // Cancel Button
-            TextButton(onClick = { /* Handle cancel */ }) {
+            TextButton(onClick = {
+                navController.navigate(Routes.Home.routes){
+                    popUpTo(Routes.PostForum.routes){
+                        inclusive = true
+                    }
+                }
+            }) {
                 Text(
                     "Cancel",
                     style = MaterialTheme.typography.bodyLarge,
@@ -95,7 +127,13 @@ fun PostForum() {
 
             // Post Button
             TextButton(
-                onClick = { /* Handle post */ },
+                onClick = {
+                          if(imageUri == null){
+                              postForumViewModel.saveData(postText,"",FirebaseAuth.getInstance().currentUser!!.uid)
+                          }else{
+                              postForumViewModel.saveImage(postText,imageUri!!,FirebaseAuth.getInstance().currentUser!!.uid)
+                          }
+                },
                 enabled = postText.isNotEmpty()
             ) {
                 Text(
@@ -114,7 +152,7 @@ fun PostForum() {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp,4.dp,16.dp,16.dp)
+                .padding(16.dp, 4.dp, 16.dp, 16.dp)
         ) {
             item {
                 // Profile Picture and TextField Row
@@ -214,7 +252,7 @@ fun PostForum() {
                             Icon(
                                 Icons.Default.Delete,
                                 contentDescription = "Remove Image",
-                                tint = MaterialTheme.colorScheme.error
+                                tint = Color.Red
                             )
                         }
                     }
@@ -227,5 +265,5 @@ fun PostForum() {
 @Preview(showBackground = true)
 @Composable
 fun ShowPostPreview() {
-    PostForum()
+    //PostForum()
 }

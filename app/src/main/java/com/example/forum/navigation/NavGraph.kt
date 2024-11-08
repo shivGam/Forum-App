@@ -27,7 +27,7 @@ fun NavGraph(navController: NavHostController){
             Notification()
         }
         composable(Routes.PostForum.routes){
-            PostForum()
+            PostForum(navController)
         }
         composable(Routes.BottomNav.routes){
             BottomNav(navController)
