@@ -35,7 +35,7 @@ fun BottomNav(navController: NavHostController){
                 Splash(navHostController)
             }
             composable(Routes.Home.routes){
-                Home()
+                Home(navController)
             }
             composable(Routes.Notification.routes){
                 Notification()
