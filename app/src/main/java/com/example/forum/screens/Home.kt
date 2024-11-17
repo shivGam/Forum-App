@@ -93,12 +93,6 @@ fun Home(navHostController: NavHostController) {
             )
         }
 
-        Divider(
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            thickness = 1.dp,
-            modifier = Modifier.fillMaxWidth()
-        )
-
         // Forum Posts List
         LazyColumn(
             modifier = Modifier

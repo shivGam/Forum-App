@@ -44,7 +44,7 @@ fun BottomNav(navController: NavHostController){
                 PostForum(navHostController)
             }
             composable(Routes.Search.routes){
-                Search()
+                Search(navController)
             }
             composable(Routes.Profile.routes){
                 Profile(navController)
