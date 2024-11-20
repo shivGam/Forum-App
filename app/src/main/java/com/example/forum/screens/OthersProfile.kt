@@ -63,7 +63,7 @@ fun OthersProfile(navController: NavHostController, uid: String) {
     val forumList by userInfoViewModel.forumListPerUserId.observeAsState()
     val users by userInfoViewModel.users.observeAsState()
     val followerList by userInfoViewModel.followerList.observeAsState()
-    val followingList by userInfoViewModel.followingList.observeAsState()
+    val followingList by userInfoViewModel.followingList.observeAsState(initial = emptyList())
 
     var currentUserID = ""
     if(FirebaseAuth.getInstance().currentUser != null ){
@@ -73,7 +73,9 @@ fun OthersProfile(navController: NavHostController, uid: String) {
     userInfoViewModel.fetchUser(uid)
     userInfoViewModel.fetchForumList(uid)
     userInfoViewModel.getFollowers(uid)
-    userInfoViewModel.getFollowing(uid)
+    LaunchedEffect(currentUserID) {
+        userInfoViewModel.getFollowing(currentUserID)
+    }
 
 
     Column(
@@ -167,6 +169,8 @@ fun OthersProfile(navController: NavHostController, uid: String) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val isFollowing = followingList.contains(uid)
+
             Button(
                 onClick = {
                     if (currentUserID.isNotEmpty()) {
@@ -176,7 +180,7 @@ fun OthersProfile(navController: NavHostController, uid: String) {
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp),
-                colors = if (followingList != null && followingList!!.contains(currentUserID)) {
+                colors = if (isFollowing) {
                     ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.surface,
                         contentColor = MaterialTheme.colorScheme.primary
@@ -190,10 +194,7 @@ fun OthersProfile(navController: NavHostController, uid: String) {
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             ) {
                 Text(
-                    text = if (followingList != null && followingList!!.contains(currentUserID))
-                        "Following"
-                    else
-                        "Follow"
+                    text = if (isFollowing) "Following" else "Follow"
                 )
             }
 

@@ -119,11 +119,10 @@ class UserInfoViewModel : ViewModel() {
                     return@addSnapshotListener
                 }
 
-                val followingIds = value?.get("followingIds") as? List<String> ?: listOf()
-                //if (followingIds != _followingList.value) { // Update only if data changes
-                    _followingList.postValue(followingIds)
-                //}
+                val followingIds = value?.get("followingIds") as? List<String> ?: emptyList()
+                _followingList.postValue(followingIds)
             }
     }
+
 
 }

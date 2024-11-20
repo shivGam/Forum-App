@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +53,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.forum.data.models.UserModel
 import com.example.forum.navigation.Routes
 import com.example.forum.viewmodels.SearchViewModel
+import com.example.forum.viewmodels.UserInfoViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,6 +61,10 @@ import com.google.firebase.auth.FirebaseAuth
 fun Search(navHostController: NavHostController) {
     val searchViewModel: SearchViewModel = viewModel()
     val userList by searchViewModel.userList.observeAsState()
+    var currentUserID = ""
+    if(FirebaseAuth.getInstance().currentUser != null ){
+        currentUserID = FirebaseAuth.getInstance().currentUser!!.uid
+    }
 
     var search by remember{
         mutableStateOf("")
@@ -110,9 +116,9 @@ fun Search(navHostController: NavHostController) {
 
             if(userList!= null){
 
-                val filterItems = userList!!.filter { (it.name.contains(search,ignoreCase = true) || it.userName.contains(search,ignoreCase = false)) && it.uid != FirebaseAuth.getInstance().currentUser!!.uid}
+                val filterItems = userList!!.filter { (it.name.contains(search,ignoreCase = true) || it.userName.contains(search,ignoreCase = false)) && it.uid != currentUserID}
                 items(filterItems ?: emptyList()) { user ->
-                    SearchItemCard(user, navHostController)
+                    SearchItemCard(user, navHostController ,currentUserID)
                     Divider(
                         modifier = Modifier.padding(vertical = 8.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
@@ -124,14 +130,22 @@ fun Search(navHostController: NavHostController) {
     }
 }
 @Composable
-fun SearchItemCard(user: UserModel, navHostController: NavHostController) {
+fun SearchItemCard(user: UserModel, navHostController: NavHostController, currentUserID : String) {
+
+    val userInfoViewModel : UserInfoViewModel = viewModel()
+    val followingList by userInfoViewModel.followingList.observeAsState(initial = emptyList())
+
+    LaunchedEffect(currentUserID) {
+        userInfoViewModel.getFollowing(currentUserID)
+    }
+
     val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(12.dp)
             .clickable {
-                val routes = Routes.OthersProfile.routes.replace("{data}",user.uid)
+                val routes = Routes.OthersProfile.routes.replace("{data}", user.uid)
                 navHostController.navigate(routes)
             },
         verticalAlignment = Alignment.CenterVertically,
@@ -180,17 +194,31 @@ fun SearchItemCard(user: UserModel, navHostController: NavHostController) {
             }
         }
 
+        val isFollowing = followingList.contains(user.uid)
         // Follow Button
         Button(
-            onClick = { /* Handle follow action */ },
+            onClick = {
+                if (currentUserID.isNotEmpty()) {
+                    userInfoViewModel.followUsers(user.uid, currentUserID)
+                }
+            },
             shape = RoundedCornerShape(20.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary,
-            ),
+            colors = if (isFollowing) {
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            },
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
         ) {
-            Text(text = "Follow", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = if (isFollowing) "Following" else "Follow"
+            )
         }
     }
 }
