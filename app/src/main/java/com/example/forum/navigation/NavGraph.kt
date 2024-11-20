@@ -8,6 +8,7 @@ import com.example.forum.screens.BottomNav
 import com.example.forum.screens.Home
 import com.example.forum.screens.Login
 import com.example.forum.screens.Notification
+import com.example.forum.screens.OthersProfile
 import com.example.forum.screens.PostForum
 import com.example.forum.screens.Profile
 import com.example.forum.screens.Register
@@ -37,6 +38,10 @@ fun NavGraph(navController: NavHostController){
         }
         composable(Routes.Profile.routes){
             Profile(navController)
+        }
+        composable(Routes.OthersProfile.routes){
+            val data = it.arguments!!.getString("data")
+            OthersProfile(navController, data!!)
         }
         composable(Routes.Login.routes){
             Login(navController)

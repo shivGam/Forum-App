@@ -10,4 +10,5 @@ sealed class Routes(val routes: String){
     data object BottomNav : Routes("bottom_nav")
     data object Login : Routes("login")
     data object Register : Routes("register")
+    data object OthersProfile : Routes("other_profile/{data}")
 }

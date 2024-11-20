@@ -255,4 +255,3 @@ fun getTimeAgo(timeStamp: Long): String {
         else -> "${timeDiff / (7 * 24 * 60 * 60 * 1000)} weeks ago"
     }
 }
-

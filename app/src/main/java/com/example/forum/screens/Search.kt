@@ -3,6 +3,7 @@ package com.example.forum.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
@@ -49,7 +50,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.forum.data.models.UserModel
+import com.example.forum.navigation.Routes
 import com.example.forum.viewmodels.SearchViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,14 +84,14 @@ fun Search(navHostController: NavHostController) {
             placeholder = { Text(text = "Search...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
-                .clip(RoundedCornerShape(12.dp)),
+                .padding(8.dp),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                 containerColor = MaterialTheme.colorScheme.surface,
                 focusedLabelColor = MaterialTheme.colorScheme.onSurface
             ),
+            shape = RoundedCornerShape(12.dp),
             singleLine = true,
             leadingIcon = {
                 Icon(
@@ -107,7 +110,7 @@ fun Search(navHostController: NavHostController) {
 
             if(userList!= null){
 
-                val filterItems = userList!!.filter { it.name.contains(search,ignoreCase = true) || it.userName.contains(search,ignoreCase = false)}
+                val filterItems = userList!!.filter { (it.name.contains(search,ignoreCase = true) || it.userName.contains(search,ignoreCase = false)) && it.uid != FirebaseAuth.getInstance().currentUser!!.uid}
                 items(filterItems ?: emptyList()) { user ->
                     SearchItemCard(user, navHostController)
                     Divider(
@@ -126,7 +129,11 @@ fun SearchItemCard(user: UserModel, navHostController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(12.dp),
+            .padding(12.dp)
+            .clickable {
+                val routes = Routes.OthersProfile.routes.replace("{data}",user.uid)
+                navHostController.navigate(routes)
+            },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
